@@ -8,6 +8,7 @@ All scripts were generated with the assistance of GitHub Copilot.
 ## [Copilot](./copilot/)
 
 - [inactive-copilot](./copilot/inactive-copilot.sh) - outputs Copilot users that have been active & inactive within 90 days
+- [user level engagement metrics](./copilot/copilot-ule.sh) - outputs a summary of user level engagement metrics using the private preview api
 
 ## [Repository Data Collection](./repo_data/)
 
