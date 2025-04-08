@@ -36,6 +36,10 @@ logger.info(f"Date range: {SINCE_DATE} to {UNTIL_DATE}")
 try:
     since_date_epoch = datetime.strptime(SINCE_DATE, "%Y-%m-%d").timestamp()
     until_date_epoch = datetime.strptime(UNTIL_DATE, "%Y-%m-%d").timestamp()
+
+    if since_date_epoch > until_date_epoch:
+        logger.error("Error: SINCE_DATE cannot be after UNTIL_DATE. Please adjust the date values.")
+        sys.exit(1)
     date_diff = (until_date_epoch - since_date_epoch) / 86400
 
     if date_diff > 14:
