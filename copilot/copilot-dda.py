@@ -60,7 +60,7 @@ logger.info(f"API URL: {url}")
 # Test the API connection first
 try:
     logger.info("Testing GitHub API connection...")
-    test_response = requests.get("https://api.github.com/rate_limit", headers=headers)
+    test_response = requests.get("https://api.github.com/rate_limit", headers=headers, timeout=10)
     test_response.raise_for_status()
     rate_limit_info = test_response.json()
     logger.info(f"GitHub API connection successful. Rate limit: {rate_limit_info.get('resources', {}).get('core', {}).get('remaining', 'unknown')} remaining.")
