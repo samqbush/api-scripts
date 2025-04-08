@@ -5,6 +5,7 @@ from datetime import datetime
 import tempfile
 import logging
 import sys
+import traceback
 
 # Configure logging - more verbose for debugging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -127,7 +128,6 @@ for entry in json_data:
                 logger.error(f"Response text: {http_err.response.text}")
         except Exception as err:
             logger.error(f"An error occurred while processing blob: {err}")
-            import traceback
             logger.error(f"Traceback: {traceback.format_exc()}")
 
     logger.info("----------------------------------------")
