@@ -7,12 +7,12 @@ All scripts were generated with the assistance of GitHub Copilot.
 
 ## [Copilot](./copilot/)
 
-- [inactive-copilot](./copilot/inactive-copilot.sh) - outputs Copilot users that have been active & inactive within 90 days
-- [user level engagement metrics](./copilot/copilot-ule.sh) - outputs a summary of user level engagement metrics using the private preview api
+- [inactive_copilot](./copilot/inactive_copilot.sh) - outputs Copilot users that have been active & inactive within 90 days
+- [user level engagement metrics](./copilot/copilot_ule.sh) - outputs a summary of user level engagement metrics using the private preview api
 
-## [Disaster Recovery](./disaster-recovery/)
+## [Disaster Recovery](./disaster_recovery/)
 
-- [owner-dr](./disaster-recovery/owner-dr.sh) - create text list backups of organization owners in an enterprise and allows an enterprise admin to restore these permissions
+- [owner_dr](./disaster_recovery/owner_dr.sh) - create text list backups of organization owners in an enterprise and allows an enterprise admin to restore these permissions
 
 ## [GHAS](./ghas/)
 
@@ -20,8 +20,8 @@ All scripts were generated with the assistance of GitHub Copilot.
 
 ## [Repository Data Collection](./repo_data/)
 
-- [get_commits](./repo_data/get_commits.py) - gathers the number of commits to repositories across an organization over the last 3 months
+- [get_commits](./repo_data/get_commits.sh) - gathers the number of commits to repositories across an organization over the last 3 months
 
 ## [Teams](./teams/)
 
-- [list-teams](./teams/list-teams.sh) - lists teams in an organization with more than 5 members to show what teams are eligible for Copilot team metrics
+- [list_teams](./teams/list_teams.sh) - lists teams in an organization with more than 5 members to show what teams are eligible for Copilot team metrics

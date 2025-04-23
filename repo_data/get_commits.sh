@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Usage:
+# ./get_commits.sh
+# This script gathers the number of commits to repositories across an organization over the last 3 months.
+
 # Add the following permissions to the GitHub fine-grained token:
 # Repository Permissions:
 #     Contents: Read-only

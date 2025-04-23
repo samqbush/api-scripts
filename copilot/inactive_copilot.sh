@@ -11,7 +11,8 @@
 # - Outputs the result, categorizing users as active, inactive, or with null dates.
 
 # Usage:
-# ./inactive-copilot.sh [output_file]
+# ./inactive_copilot.sh [output_file]
+# This script fetches the billing seats data for a specified GitHub enterprise organization and calculates user activity.
 # Check if jq & gh cli are installed
 
 # Variables:

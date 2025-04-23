@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Usage:
+# ./copilot_ule.sh
+# This script outputs a summary of user-level engagement metrics using the private preview API.
+
 # Fetch JSON data using the gh api command
 EMU="fabrikam" # Replace with your enterprise name
 JSON_DATA=$(gh api "/enterprises/$EMU/copilot/user-engagement")

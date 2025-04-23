@@ -15,7 +15,7 @@
 #   3. Proper permissions to access the repository's secret scanning alerts
 #
 # Usage: 
-#   ./get_secret_alerts.sh <repository> <date> [flags]
+#   ./ignore_secrets.sh <repository> <date> [flags]
 #
 # Arguments:
 #   <repository>    Owner/repo name (e.g., "octocat/hello-world")
@@ -31,13 +31,13 @@
 #
 # Examples:
 #   # Ignore alerts from commits on or before April 15, 2025
-#   ./get_secret_alerts.sh octocat/hello-world 2025-04-15
+#   ./ignore_secrets.sh octocat/hello-world 2025-04-15
 #
 #   # Show what would be ignored (alerts on or before April 15, 2025)
-#   ./get_secret_alerts.sh octocat/hello-world 2025-04-15 --dry-run
+#   ./ignore_secrets.sh octocat/hello-world 2025-04-15 --dry-run
 #
 #   # Quick list of all alerts without date filtering
-#   ./get_secret_alerts.sh octocat/hello-world 2025-04-15 --list-alerts
+#   ./ignore_secrets.sh octocat/hello-world 2025-04-15 --list-alerts
 #
 ###############################################################################
 
@@ -60,8 +60,8 @@ show_usage() {
   echo "  --debug         Show raw API responses for debugging"
   echo ""
   echo "Examples:"
-  echo "  ./get_secret_alerts.sh octocat/hello-world 2025-04-15"
-  echo "  ./get_secret_alerts.sh octocat/hello-world 2025-04-15 --dry-run"
+  echo "  ./ignore_secrets.sh octocat/hello-world 2025-04-15"
+  echo "  ./ignore_secrets.sh octocat/hello-world 2025-04-15 --dry-run"
 }
 
 # Check for required arguments
