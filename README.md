@@ -10,13 +10,17 @@ All scripts were generated with the assistance of GitHub Copilot.
 - [inactive-copilot](./copilot/inactive-copilot.sh) - outputs Copilot users that have been active & inactive within 90 days
 - [user level engagement metrics](./copilot/copilot-ule.sh) - outputs a summary of user level engagement metrics using the private preview api
 
-## [Repository Data Collection](./repo_data/)
-
-- [get_commits](./repo_data/get_commits.py) - gathers the number of commits to repositories across an organization over the last 3 months
-
 ## [Disaster Recovery](./disaster-recovery/)
 
 - [owner-dr](./disaster-recovery/owner-dr.sh) - create text list backups of organization owners in an enterprise and allows an enterprise admin to restore these permissions
+
+## [GHAS](./ghas/)
+
+- [ignore_secrets](./ghas/ignore_secrets.sh) - fetches secret scanning alerts from a GitHub repository and filters them based on commit dates to identify when secrets were first introduced to the codebase and resolves them as false_positives
+
+## [Repository Data Collection](./repo_data/)
+
+- [get_commits](./repo_data/get_commits.py) - gathers the number of commits to repositories across an organization over the last 3 months
 
 ## [Teams](./teams/)
 
