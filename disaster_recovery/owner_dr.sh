@@ -15,7 +15,7 @@
 # - test: Tests the script on a single organization provided as an argument.
 
 # Usage:
-# ./owner-dr.sh {backup|restore|test} [organization]
+# ./owner_dr.sh {backup|restore|test} [organization]
 # - backup: Calls the backup_owners function to create backup files of organization owners.
 # - restore: Calls the restore_owners function to restore organization owners from the backup files.
 # - test: Calls the test function to test the script on a single organization.

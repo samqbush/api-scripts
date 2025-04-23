@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Usage:
+# ./list_teams.sh
 # This script fetches all teams in a specified GitHub organization and checks the number of members in each team.
 # If a team has more than 5 members, it prints a message indicating that the team has more than 5 developers.
 #
