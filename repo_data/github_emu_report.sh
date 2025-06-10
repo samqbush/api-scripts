@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # github_emu_report.sh
 #
 # Usage:

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # This script fetches the billing seats data for a specified GitHub enterprise organization and calculates the difference in days between the created_at and last_activity_at dates for each user.
 # If last_activity_at is null or empty, it lists the created_at date in a user-friendly format.
 # https://docs.github.com/en/enterprise-cloud@latest/rest/copilot/copilot-user-management
