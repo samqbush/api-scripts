@@ -1,3 +1,4 @@
 *.txt
 /.venv/
 .vscode/
+/copilot_analysis*

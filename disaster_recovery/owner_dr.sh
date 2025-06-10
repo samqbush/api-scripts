@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # This script provides functionality to backup and restore GitHub organization owners.
 # It uses the GitHub CLI (gh) and jq to interact with the GitHub API and process JSON data.
