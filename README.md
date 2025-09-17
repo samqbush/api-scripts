@@ -18,6 +18,20 @@ All scripts were generated with the assistance of GitHub Copilot.
 - [`copilot_dda_complete.py`](./copilot/copilot_dda_complete.py) - Complete Direct Data Access analysis with visualizations and comprehensive reporting (requires pandas, matplotlib, seaborn)
 - [`data_explorer.py`](./copilot/data_explorer.py) - Interactive tool for exploring Copilot usage data
 
+- [`plot_copilot_json.py`](./copilot/plot_copilot_json.py) - Generates Copilot Enterprise Dashboard user-level metrics visualizations from exported JSON data. Outputs dashboard-ready PNGs for code activity, engagement, feature usage, acceptance rate, IDE usage, and language diversity per user. Usage:
+   ```bash
+   /path/to/python ./copilot/plot_copilot_json.py <json_file> <output_dir>
+   ```
+   - Only dashboard_* PNGs are produced (no duplicates)
+   - Requires: pandas, matplotlib, seaborn
+   - Example output files:
+      - dashboard_user_code_activity.png
+      - dashboard_user_engagement_heatmap.png
+      - dashboard_feature_usage_by_user.png
+      - dashboard_acceptance_rate_per_user.png
+      - dashboard_ide_usage_by_user.png
+      - dashboard_language_diversity_per_user.png
+
 ## 🔄 [Disaster Recovery](./disaster_recovery/)
 
 - [`owner_dr.sh`](./disaster_recovery/owner_dr.sh) - Creates text-based backups of organization owners in an enterprise and allows restoration of these permissions
