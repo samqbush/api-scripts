@@ -699,22 +699,22 @@ EOF
 
 | Metric | Count | Percentage |
 |--------|-------|------------|
-| Total EMU Users | $total_emu | 100% |
+| Total EMU Users | $total_enterprise | 100% |
 | Total Copilot Users | $total_copilot | - |
-| Users with Both Licenses | $both_count | $(if command -v bc &> /dev/null; then echo "scale=1; $both_count * 100 / $total_emu" | bc -l; else echo "0"; fi)% |
-| **EMU Users Missing Copilot** | **$emu_only_count** | **$(if command -v bc &> /dev/null; then echo "scale=1; $emu_only_count * 100 / $total_emu" | bc -l; else echo "0"; fi)%** |
+| Users with Both Licenses | $both_count | $(if command -v bc &> /dev/null; then echo "scale=1; $both_count * 100 / $total_enterprise" | bc -l; else echo "0"; fi)% |
+| **EMU Users Missing Copilot** | **$enterprise_only_count** | **$(if command -v bc &> /dev/null; then echo "scale=1; $enterprise_only_count * 100 / $total_enterprise" | bc -l; else echo "0"; fi)%** |
 | Copilot Users Missing EMU | $copilot_only_count | - |
 
 ## Key Findings
 
 ### 🎯 License Provisioning Opportunities
-- **$emu_only_count EMU users** do not have Copilot licenses
+- **$enterprise_only_count EMU users** do not have Copilot licenses
 - These users are candidates for Copilot license provisioning
-- Represents $(if command -v bc &> /dev/null; then echo "scale=1; $emu_only_count * 100 / $total_emu" | bc -l; else echo "0"; fi)% of your EMU population
+- Represents $(if command -v bc &> /dev/null; then echo "scale=1; $enterprise_only_count * 100 / $total_enterprise" | bc -l; else echo "0"; fi)% of your EMU population
 
 ### ✅ Properly Licensed Users
 - **$both_count users** have both enterprise and Copilot licenses
-- $(if command -v bc &> /dev/null; then echo "scale=1; $both_count * 100 / $total_emu" | bc -l; else echo "0"; fi)% license coverage rate
+- $(if command -v bc &> /dev/null; then echo "scale=1; $both_count * 100 / $total_enterprise" | bc -l; else echo "0"; fi)% license coverage rate
 
 ### 🔍 License Review Required
 - **$copilot_only_count users** have Copilot licenses but no EMU seat
@@ -722,7 +722,7 @@ EOF
 
 ## Recommendations
 
-1. **Immediate Action:** Review the $emu_only_count EMU users without Copilot licenses
+1. **Immediate Action:** Review the $enterprise_only_count EMU users without Copilot licenses
 2. **License Provisioning:** Consider providing Copilot licenses to high-value developers
 3. **Cost Optimization:** Review $copilot_only_count Copilot-only licenses for cleanup opportunities
 4. **Regular Auditing:** Schedule quarterly license alignment reviews
@@ -809,7 +809,6 @@ main() {
   success "License comparison completed successfully"
   success "Results saved to: $OUT_DIR"
   success "Primary target: $enterprise_only_count Enterprise users without Copilot licenses"
-  success "Primary target: $emu_only_count EMU users without Copilot licenses"
 }
 
 # Execute main function if script is run directly
