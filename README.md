@@ -13,10 +13,43 @@ All scripts were generated with the assistance of GitHub Copilot.
 ### Bash Scripts (Recommended)
 - [`inactive_copilot.sh`](./copilot/inactive_copilot.sh) - Identifies Copilot users active and inactive within 90 days
 - [`copilot_ule.sh`](./copilot/copilot_ule.sh) - Generates user-level engagement metrics using the private preview API
+- [`compare_ghe_copilot_licenses.sh`](./compare_ghe_copilot_licenses.sh) - **License Gap Analysis** - Compares GitHub Enterprise Managed Users with Copilot licenses to identify users who have enterprise licenses but no Copilot license. Perfect for license optimization and provisioning planning.
+   ```bash
+   # Basic usage (using GitHub CLI authentication)
+   gh auth login  # One-time setup
+   ./compare_ghe_copilot_licenses.sh --enterprise your-enterprise
+   
+   # Complete analysis with all output formats
+   ./compare_ghe_copilot_licenses.sh \
+     --enterprise your-enterprise \
+     --out license_audit_$(date +%Y%m%d) \
+     --markdown --csv --json
+   
+   # Test mode with sample data (no authentication required)
+   ./compare_ghe_copilot_licenses.sh --enterprise demo --test-mode --markdown --csv
+   ```
+   - **Required Permissions:** Enterprise admin access, Copilot billing access
+   - **Key Output:** `license_gaps_emu_only.json` - EMU users missing Copilot licenses
+   - **Reports:** JSON summary, CSV export, Markdown report with recommendations
+   - **Features:** Test mode, comprehensive logging, license coverage analysis
 
 ### Python Scripts (Advanced Analysis)
 - [`copilot_dda_complete.py`](./copilot/copilot_dda_complete.py) - Complete Direct Data Access analysis with visualizations and comprehensive reporting (requires pandas, matplotlib, seaborn)
 - [`data_explorer.py`](./copilot/data_explorer.py) - Interactive tool for exploring Copilot usage data
+
+- [`plot_copilot_json.py`](./copilot/plot_copilot_json.py) - Generates Copilot Enterprise Dashboard user-level metrics visualizations from exported JSON data. Outputs dashboard-ready PNGs for code activity, engagement, feature usage, acceptance rate, IDE usage, and language diversity per user. Usage:
+   ```bash
+   /path/to/python ./copilot/plot_copilot_json.py <json_file> <output_dir>
+   ```
+   - Only dashboard_* PNGs are produced (no duplicates)
+   - Requires: pandas, matplotlib, seaborn
+   - Example output files:
+      - dashboard_user_code_activity.png
+      - dashboard_user_engagement_heatmap.png
+      - dashboard_feature_usage_by_user.png
+      - dashboard_acceptance_rate_per_user.png
+      - dashboard_ide_usage_by_user.png
+      - dashboard_language_diversity_per_user.png
 
 ## 🔄 [Disaster Recovery](./disaster_recovery/)
 
@@ -43,7 +76,7 @@ All scripts were generated with the assistance of GitHub Copilot.
 
 ### All Scripts
 - GitHub CLI installed and authenticated (`gh auth login`)
-- `GITHUB_TOKEN` environment variable set with appropriate scopes
+- **Security Note:** GitHub CLI provides secure authentication without exposing tokens in command line or environment variables
 
 ### Python Scripts Only
 ```bash
