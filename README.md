@@ -13,6 +13,25 @@ All scripts were generated with the assistance of GitHub Copilot.
 ### Bash Scripts (Recommended)
 - [`inactive_copilot.sh`](./copilot/inactive_copilot.sh) - Identifies Copilot users active and inactive within 90 days
 - [`copilot_ule.sh`](./copilot/copilot_ule.sh) - Generates user-level engagement metrics using the private preview API
+- [`compare_ghe_copilot_licenses.sh`](./compare_ghe_copilot_licenses.sh) - **License Gap Analysis** - Compares GitHub Enterprise Managed Users with Copilot licenses to identify users who have enterprise licenses but no Copilot license. Perfect for license optimization and provisioning planning.
+   ```bash
+   # Basic usage (using GitHub CLI authentication)
+   gh auth login  # One-time setup
+   ./compare_ghe_copilot_licenses.sh --enterprise your-enterprise
+   
+   # Complete analysis with all output formats
+   ./compare_ghe_copilot_licenses.sh \
+     --enterprise your-enterprise \
+     --out license_audit_$(date +%Y%m%d) \
+     --markdown --csv --json
+   
+   # Test mode with sample data (no authentication required)
+   ./compare_ghe_copilot_licenses.sh --enterprise demo --test-mode --markdown --csv
+   ```
+   - **Required Permissions:** Enterprise admin access, Copilot billing access
+   - **Key Output:** `license_gaps_emu_only.json` - EMU users missing Copilot licenses
+   - **Reports:** JSON summary, CSV export, Markdown report with recommendations
+   - **Features:** Test mode, comprehensive logging, license coverage analysis
 
 ### Python Scripts (Advanced Analysis)
 - [`copilot_dda_complete.py`](./copilot/copilot_dda_complete.py) - Complete Direct Data Access analysis with visualizations and comprehensive reporting (requires pandas, matplotlib, seaborn)
@@ -57,7 +76,7 @@ All scripts were generated with the assistance of GitHub Copilot.
 
 ### All Scripts
 - GitHub CLI installed and authenticated (`gh auth login`)
-- `GITHUB_TOKEN` environment variable set with appropriate scopes
+- **Security Note:** GitHub CLI provides secure authentication without exposing tokens in command line or environment variables
 
 ### Python Scripts Only
 ```bash
