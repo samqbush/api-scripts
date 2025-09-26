@@ -12,7 +12,6 @@ All scripts were generated with the assistance of GitHub Copilot.
 
 ### Bash Scripts (Recommended)
 - [`inactive_copilot.sh`](./copilot/inactive_copilot.sh) - Identifies Copilot users active and inactive within 90 days
-- [`copilot_ule.sh`](./copilot/copilot_ule.sh) - Generates user-level engagement metrics using the private preview API
 - [`compare_ghe_copilot_licenses.sh`](./compare_ghe_copilot_licenses.sh) - **License Gap Analysis** - Compares GitHub Enterprise Managed Users with Copilot licenses to identify users who have enterprise licenses but no Copilot license. Perfect for license optimization and provisioning planning.
    ```bash
    # Basic usage (using GitHub CLI authentication)
@@ -34,9 +33,6 @@ All scripts were generated with the assistance of GitHub Copilot.
    - **Features:** Test mode, comprehensive logging, license coverage analysis
 
 ### Python Scripts (Advanced Analysis)
-- [`copilot_dda_complete.py`](./copilot/copilot_dda_complete.py) - Complete Direct Data Access analysis with visualizations and comprehensive reporting (requires pandas, matplotlib, seaborn)
-- [`data_explorer.py`](./copilot/data_explorer.py) - Interactive tool for exploring Copilot usage data
-
 - [`plot_copilot_json.py`](./copilot/plot_copilot_json.py) - Generates Copilot Enterprise Dashboard user-level metrics visualizations from exported JSON data. Outputs dashboard-ready PNGs for code activity, engagement, feature usage, acceptance rate, IDE usage, and language diversity per user. Usage:
    ```bash
    /path/to/python ./copilot/plot_copilot_json.py <json_file> <output_dir>
