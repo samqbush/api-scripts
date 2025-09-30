@@ -164,6 +164,13 @@ check_prerequisites() {
     error "Install with: brew install jq (macOS) or apt-get install jq (Linux)"
     exit 1
   fi
+
+  # Check for bc
+  if ! command -v bc &> /dev/null; then
+    error "bc is required but not installed."
+    error "Install with: brew install bc (macOS) or apt-get install bc (Linux)"
+    exit 1
+  fi
   
   # Check for gh - try common locations
   GH_CMD=""
@@ -927,15 +934,87 @@ generate_markdown_report() {
 | Total GHEC Users | $ghec_total |
 | Users in Both Systems | $in_both_count |
 | Users Only in EMU | $only_emu_count |
-| Users Only in GHEC | $only_ghec_count |
-
+- **EMU Match Rate:** $(
+    if [[ "$emu_total" -eq 0 ]]; then
+      echo "N/A (no EMU users)"
+    else
+      echo "$(echo "scale=2; $in_both_count * 100 / $emu_total" | bc)% of EMU users are in GHEC"
+    fi
+  )
+- **GHEC Match Rate:** $(
+    if [[ "$ghec_total" -eq 0 ]]; then
+      echo "N/A (no GHEC users)"
+    else
+      echo "$(echo "scale=2; $in_both_count * 100 / $ghec_total" | bc)% of GHEC users are in EMU"
+    fi
+  )
+      echo "N/A (no EMU users)"
+    else
+      echo "$(echo "scale=2; $in_both_count * 100 / $emu_total" | bc)% of EMU users are in GHEC"
+    fi
+  )
+- **GHEC Match Rate:** $(
+    if [[ "$ghec_total" -eq 0 ]]; then
+      echo "N/A (no GHEC users)"
+    else
+      echo "$(echo "scale=2; $in_both_count * 100 / $ghec_total" | bc)% of GHEC users are in EMU"
+    fi
+  )
+      echo "N/A (no EMU users)"
+    else
+      echo "$(echo "scale=2; $in_both_count * 100 / $emu_total" | bc)% of EMU users are in GHEC"
+    fi
+  )
+- **GHEC Match Rate:** $(
+    if [[ "$ghec_total" -eq 0 ]]; then
+      echo "N/A (no GHEC users)"
+    else
+      echo "$(echo "scale=2; $in_both_count * 100 / $ghec_total" | bc)% of GHEC users are in EMU"
+    fi
+  )
+      echo "N/A (no EMU users)"
+    else
+      echo "$(echo "scale=2; $in_both_count * 100 / $emu_total" | bc)% of EMU users are in GHEC"
+    fi
+  )
+- **GHEC Match Rate:** $(
+    if [[ "$ghec_total" -eq 0 ]]; then
+      echo "N/A (no GHEC users)"
+    else
+      echo "$(echo "scale=2; $in_both_count * 100 / $ghec_total" | bc)% of GHEC users are in EMU"
+    fi
+  )
+      echo "N/A (no EMU users)"
+    else
+      echo "$(echo "scale=2; $in_both_count * 100 / $emu_total" | bc)% of EMU users are in GHEC"
+    fi
+  )
+- **GHEC Match Rate:** $(
+    if [[ "$ghec_total" -eq 0 ]]; then
+      echo "N/A (no GHEC users)"
+    else
+      echo "$(echo "scale=2; $in_both_count * 100 / $ghec_total" | bc)% of GHEC users are in EMU"
+    fi
+  )
 ---
 
 ## Analysis
 
 ### Match Rate
-- **EMU Match Rate:** $(echo "scale=2; $in_both_count * 100 / $emu_total" | bc)% of EMU users are in GHEC
-- **GHEC Match Rate:** $(echo "scale=2; $in_both_count * 100 / $ghec_total" | bc)% of GHEC users are in EMU
+- **EMU Match Rate:** $(
+    if [[ "$emu_total" -eq 0 ]]; then
+      echo "N/A (no EMU users)"
+    else
+      echo "$(echo "scale=2; $in_both_count * 100 / $emu_total" | bc)%"
+    fi
+  ) of EMU users are in GHEC
+- **GHEC Match Rate:** $(
+    if [[ "$ghec_total" -eq 0 ]]; then
+      echo "N/A (no GHEC users)"
+    else
+      echo "$(echo "scale=2; $in_both_count * 100 / $ghec_total" | bc)%"
+    fi
+  ) of GHEC users are in EMU
 
 ### Users in Both Systems ($in_both_count)
 These users exist in both the EMU enterprise and the GHEC $GHEC_TARGET_TYPE with matching email addresses.
@@ -1094,8 +1173,8 @@ main() {
   check_prerequisites
   setup_directories
   
-  # Set up trap to restore account on exit
-  trap restore_original_account EXIT INT TERM
+  # Set up trap to restore account and cleanup on exit
+  trap cleanup EXIT INT TERM
   
   # Fetch users from both systems
   fetch_emu_users
