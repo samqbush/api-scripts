@@ -2,44 +2,19 @@
 
 # compare_emu_ghec_users.sh
 #
-# Usage:
-#   gh auth login  # One-time authentication setup
-#   ./compare_emu_ghec_users.sh --emu-enterprise ENTERPRISE --ghec-org ORGANIZATION [OPTIONS]
+# Compare users between GitHub Enterprise Managed User (EMU) and GitHub Enterprise Cloud (GHEC)
+# to identify differences in user provisioning.
 #
-# Description:
-#   Compares users between a GitHub Enterprise Managed User (EMU) instance and a 
-#   GitHub Enterprise Cloud (GHEC) organization to identify differences in user provisioning.
-#   Uses SCIM API for EMU and GraphQL API for GHEC to fetch and compare user emails.
+# QUICK START:
+#   ./compare_emu_ghec_users.sh --emu-enterprise my-emu --ghec-org my-org --csv
 #
-# Examples:
-#   # Basic comparison (using GitHub CLI authentication)
-#   gh auth login  # One-time setup
-#   ./compare_emu_ghec_users.sh --emu-enterprise my-emu --ghec-org my-org
+# FULL DOCUMENTATION:
+#   ./compare_emu_ghec_users.sh --help
+#   See also: USAGE_compare_emu_ghec.md
 #
-#   # Full analysis with all output formats
-#   ./compare_emu_ghec_users.sh \
-#     --emu-enterprise my-emu \
-#     --ghec-org my-org \
-#     --out user_comparison_20250930 \
-#     --markdown --json --csv \
-#     --debug
-#
-# Requirements:
-#   - GitHub CLI (gh) installed and authenticated (gh auth login)
-#   - jq must be installed  
-#   - Access to both EMU enterprise and GHEC organization with required permissions
-#
-# Arguments:
-#   --emu-enterprise SLUG  Required. GitHub EMU Enterprise slug/name
-#   --ghec-org ORG         Required. GitHub GHEC Organization name
-#   --out DIRECTORY        Output directory (default: compare_users_TIMESTAMP)
-#   --markdown             Generate Markdown summary report (default: true)
-#   --json                 Generate detailed JSON reports (default: true)
-#   --csv                  Generate CSV export for spreadsheet analysis
-#   --sleep-ms MS          Sleep between API calls in milliseconds (default: 100)
-#   --keep-tmp             Keep temporary files for debugging
-#   --debug                Enable verbose debug output
-#   --help, -h             Show this help message
+# REQUIREMENTS:
+#   - GitHub CLI (gh) authenticated
+#   - jq and bc installed
 
 set -e
 
@@ -116,6 +91,7 @@ ACCOUNT SWITCHING (for cross-account access):
   
   Note: Script will automatically switch between accounts as needed.
         Both accounts must be authenticated with 'gh auth login'.
+        Use this when EMU and GHEC require different GitHub accounts.
 
 OPTIONAL ARGUMENTS:
   --out DIRECTORY             Output directory (default: compare_users_TIMESTAMP)
@@ -128,29 +104,82 @@ OPTIONAL ARGUMENTS:
   --help, -h                  Show this help message
 
 EXAMPLES:
-  # Compare EMU with GHEC organization
-  ${SCRIPT_NAME} --emu-enterprise my-emu --ghec-org my-org
+  # Quick start - compare EMU with GHEC organization
+  ${SCRIPT_NAME} --emu-enterprise my-emu --ghec-org my-org --csv
 
-  # Compare with account switching (EMU account vs non-EMU account)
-  ${SCRIPT_NAME} \\
-    --emu-enterprise my-emu \\
-    --emu-account user_emu \\
-    --ghec-enterprise my-ghec \\
-    --ghec-account user
+  # Compare EMU with GHEC enterprise (not just one org)
+  ${SCRIPT_NAME} --emu-enterprise my-emu --ghec-enterprise my-ghec --csv
 
-  # With all output formats and debugging
+  # With account switching (EMU account vs non-EMU account)
   ${SCRIPT_NAME} \\
-    --emu-enterprise my-emu \\
-    --emu-account user_emu \\
+    --emu-enterprise fabrikam \\
+    --emu-account samqbush_fabrikam \\
     --ghec-org my-org \\
-    --ghec-account user \\
-    --csv --debug
+    --ghec-account samqbush \\
+    --csv
+
+  # Full comparison with custom output directory
+  ${SCRIPT_NAME} \\
+    --emu-enterprise my-emu \\
+    --ghec-org my-org \\
+    --out user_audit_\$(date +%Y%m%d) \\
+    --csv --markdown --debug
+
+  # Rate-limited for large organizations
+  ${SCRIPT_NAME} \\
+    --emu-enterprise large-emu \\
+    --ghec-org large-org \\
+    --sleep-ms 500 \\
+    --csv
 
 REQUIREMENTS:
   - GitHub CLI (gh) installed and authenticated
   - jq for JSON processing
+  - bc for percentage calculations
   - Appropriate access permissions for both instances
-  - If using account switching, both accounts must be authenticated
+
+AUTHENTICATION & TOKENS:
+  This script uses GitHub CLI (gh) for authentication. Ensure you have the
+  required token scopes:
+
+  For EMU SCIM API:
+    - Minimum: scim:enterprise
+    - Recommended: admin:enterprise
+
+  For GHEC Organization GraphQL:
+    - Minimum: read:org
+    - Recommended: admin:org
+    - Note: Organization must have SAML SSO configured
+
+  For GHEC Enterprise GraphQL:
+    - Minimum: read:enterprise
+    - Recommended: admin:enterprise
+    - Note: Enterprise must have SAML SSO configured
+
+  To refresh token scopes:
+    gh auth refresh -h github.com -s admin:enterprise,read:org
+
+APIS USED:
+  - EMU: /scim/v2/enterprises/{enterprise}/Users (SCIM REST API)
+  - GHEC Org: GraphQL organization.samlIdentityProvider.externalIdentities
+  - GHEC Enterprise: GraphQL enterprise.ownerInfo.samlIdentityProvider.externalIdentities
+
+OUTPUT FILES:
+  - comparison_results.json - Complete comparison data in JSON format
+  - summary_report.md - Human-readable summary with recommendations
+  - users_in_both.csv - Users present in both systems (if --csv enabled)
+  - users_only_in_emu.csv - Users only in EMU (if --csv enabled)
+  - users_only_in_ghec.csv - Users only in GHEC (if --csv enabled)
+
+ACCOUNT SWITCHING WORKFLOW:
+  1. Authenticate both accounts: gh auth login (run twice for each account)
+  2. Verify with: gh auth status
+  3. Run script with --emu-account and --ghec-account flags
+  4. Script validates both accounts are authenticated
+  5. Script tracks original account and restores it when complete
+
+For more information and detailed usage guide, see:
+  USAGE_compare_emu_ghec.md
 
 EOF
 }
@@ -934,68 +963,8 @@ generate_markdown_report() {
 | Total GHEC Users | $ghec_total |
 | Users in Both Systems | $in_both_count |
 | Users Only in EMU | $only_emu_count |
-- **EMU Match Rate:** $(
-    if [[ "$emu_total" -eq 0 ]]; then
-      echo "N/A (no EMU users)"
-    else
-      echo "$(echo "scale=2; $in_both_count * 100 / $emu_total" | bc)% of EMU users are in GHEC"
-    fi
-  )
-- **GHEC Match Rate:** $(
-    if [[ "$ghec_total" -eq 0 ]]; then
-      echo "N/A (no GHEC users)"
-    else
-      echo "$(echo "scale=2; $in_both_count * 100 / $ghec_total" | bc)% of GHEC users are in EMU"
-    fi
-  )
-      echo "N/A (no EMU users)"
-    else
-      echo "$(echo "scale=2; $in_both_count * 100 / $emu_total" | bc)% of EMU users are in GHEC"
-    fi
-  )
-- **GHEC Match Rate:** $(
-    if [[ "$ghec_total" -eq 0 ]]; then
-      echo "N/A (no GHEC users)"
-    else
-      echo "$(echo "scale=2; $in_both_count * 100 / $ghec_total" | bc)% of GHEC users are in EMU"
-    fi
-  )
-      echo "N/A (no EMU users)"
-    else
-      echo "$(echo "scale=2; $in_both_count * 100 / $emu_total" | bc)% of EMU users are in GHEC"
-    fi
-  )
-- **GHEC Match Rate:** $(
-    if [[ "$ghec_total" -eq 0 ]]; then
-      echo "N/A (no GHEC users)"
-    else
-      echo "$(echo "scale=2; $in_both_count * 100 / $ghec_total" | bc)% of GHEC users are in EMU"
-    fi
-  )
-      echo "N/A (no EMU users)"
-    else
-      echo "$(echo "scale=2; $in_both_count * 100 / $emu_total" | bc)% of EMU users are in GHEC"
-    fi
-  )
-- **GHEC Match Rate:** $(
-    if [[ "$ghec_total" -eq 0 ]]; then
-      echo "N/A (no GHEC users)"
-    else
-      echo "$(echo "scale=2; $in_both_count * 100 / $ghec_total" | bc)% of GHEC users are in EMU"
-    fi
-  )
-      echo "N/A (no EMU users)"
-    else
-      echo "$(echo "scale=2; $in_both_count * 100 / $emu_total" | bc)% of EMU users are in GHEC"
-    fi
-  )
-- **GHEC Match Rate:** $(
-    if [[ "$ghec_total" -eq 0 ]]; then
-      echo "N/A (no GHEC users)"
-    else
-      echo "$(echo "scale=2; $in_both_count * 100 / $ghec_total" | bc)% of GHEC users are in EMU"
-    fi
-  )
+| Users Only in GHEC | $only_ghec_count |
+
 ---
 
 ## Analysis
@@ -1024,10 +993,8 @@ EOF
   # Add sample of users in both (limit to 10)
   if [[ $in_both_count -gt 0 ]]; then
     echo "$comparison" | jq -r '
-      .comparison.in_both[0:10] | 
-      ["| Email | EMU Username | GHEC Username |"],
-      ["|-------|--------------|---------------|"],
-      (.[] | "| \(.email) | \(.emu_user.username) | \(.ghec_user.username) |")
+      ["| Email | EMU Username | GHEC Username |", "|-------|--------------|---------------|"] +
+      (.comparison.in_both[0:10] | map("| \(.email) | \(.emu_user.username) | \(.ghec_user.username) |"))
       | .[]
     ' >> "$output_file"
     
@@ -1051,10 +1018,8 @@ EOF
   # Add sample of users only in EMU (limit to 10)
   if [[ $only_emu_count -gt 0 ]]; then
     echo "$comparison" | jq -r '
-      .comparison.only_in_emu[0:10] | 
-      ["| Email | Username | Display Name | Active |"],
-      ["|-------|----------|--------------|--------|"],
-      (.[] | "| \(.email) | \(.username) | \(.display_name) | \(.active) |")
+      ["| Email | Username | Display Name | Active |", "|-------|----------|--------------|--------|"] +
+      (.comparison.only_in_emu[0:10] | map("| \(.email) | \(.username) | \(.display_name) | \(.active) |"))
       | .[]
     ' >> "$output_file"
     
@@ -1078,10 +1043,8 @@ EOF
   # Add sample of users only in GHEC (limit to 10)
   if [[ $only_ghec_count -gt 0 ]]; then
     echo "$comparison" | jq -r '
-      .comparison.only_in_ghec[0:10] | 
-      ["| Email | Username |"],
-      ["|-------|----------|"],
-      (.[] | "| \(.email) | \(.username) |")
+      ["| Email | Username |", "|-------|----------|"] +
+      (.comparison.only_in_ghec[0:10] | map("| \(.email) | \(.username) |"))
       | .[]
     ' >> "$output_file"
     
