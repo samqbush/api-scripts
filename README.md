@@ -32,6 +32,33 @@ All scripts were generated with the assistance of GitHub Copilot.
    - **Reports:** JSON summary, CSV export, Markdown report with recommendations
    - **Features:** Test mode, comprehensive logging, license coverage analysis
 
+## 👥 [User Management & Provisioning](./user_management/)
+
+- [`compare_emu_ghec_users.sh`](./user_management/compare_emu_ghec_users.sh) - **EMU vs GHEC User Comparison** - Compares users between a GitHub Enterprise Managed User (EMU) instance and a GitHub Enterprise Cloud (GHEC) organization or enterprise. Uses SCIM API for EMU and GraphQL for GHEC. **[Full Documentation →](./user_management/USAGE_compare_emu_ghec.md)**
+   ```bash
+   # Simple comparison
+   ./user_management/compare_emu_ghec_users.sh --emu-enterprise my-emu --ghec-org my-org --csv
+   
+   # With account switching (EMU vs non-EMU accounts)
+   ./user_management/compare_emu_ghec_users.sh \
+     --emu-enterprise my-emu \
+     --emu-account user_emu \
+     --ghec-enterprise my-ghec \
+     --ghec-account user_regular \
+     --csv --markdown
+   ```
+   - **Version:** 1.1.0
+   - **Required Permissions:** EMU enterprise admin, GHEC org/enterprise access
+   - **Key Features:** 
+     - Automatic account switching for cross-account access
+     - Supports both GHEC organizations and enterprises
+     - Identifies provisioning gaps and external collaborators
+     - Multiple output formats (JSON, CSV, Markdown)
+   - **Requirements:** SAML SSO must be configured on GHEC target
+   - **Documentation:** See [USAGE_compare_emu_ghec.md](./user_management/USAGE_compare_emu_ghec.md) for complete guide
+
+## 📊 [Copilot Analytics (continued)](./copilot/)
+
 ### Python Scripts (Advanced Analysis)
 - [`plot_copilot_json.py`](./copilot/plot_copilot_json.py) - Generates Copilot Enterprise Dashboard user-level metrics visualizations from exported JSON data. Outputs dashboard-ready PNGs for code activity, engagement, feature usage, acceptance rate, IDE usage, and language diversity per user. Usage:
    ```bash
