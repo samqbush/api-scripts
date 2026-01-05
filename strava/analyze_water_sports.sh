@@ -47,12 +47,60 @@ LOCATION_NAMES="
 39.23,-105.23|South Platte, CO
 40.01,-106.20|Williams Fork, CO
 40.01,-106.21|Williams Fork, CO
+39.62,-106.05|Lake Dillon, CO
+39.63,-106.05|Lake Dillon, CO
+39.64,-105.15|Lake McConaughy
+41.21,-101.77|Lake McConaughy
 24.05,-109.99|La Paz, Mexico
 24.09,-109.99|La Paz, Mexico
-24.08,-110.00|La Ventana, Mexico
-24.09,-110.00|La Ventana, Mexico
-24.08,-110|La Ventana, Mexico
-24.09,-110|La Ventana, Mexico
+24.08,-110.00|La Paz, Mexico
+24.09,-110.00|La Paz, Mexico
+24.08,-110|La Paz, Mexico
+24.09,-110|La Paz, Mexico
+26.44,-81.92|SW Florida Coast (Stuart/Jupiter)
+26.46,-81.97|SW Florida Coast (Stuart/Jupiter)
+26.43,-81.92|SW Florida Coast (Stuart/Jupiter)
+26.43,-81.93|SW Florida Coast (Stuart/Jupiter)
+46.01,-89.51|Upper Peninsula, Michigan
+46.00,-89.51|Upper Peninsula, Michigan
+46.00,-89.52|Upper Peninsula, Michigan
+46,-89.51|Upper Peninsula, Michigan
+27.75,33.70|Red Sea, Egypt
+27.74,33.69|Red Sea, Egypt
+27.75,33.69|Red Sea, Egypt
+27.54,33.78|Red Sea, Egypt
+27.54,33.79|Red Sea, Egypt
+"
+
+# Mileage location mappings (more detailed for mileage breakdown)
+MILEAGE_LOCATION_NAMES="
+39.65,-105.17|Soda Lake, CO
+39.64,-105.17|Soda Lake, CO
+39.65,-105.15|Bear Creek Lake, CO
+39.65,-105.18|Soda Lake, CO
+39.64,-105.18|Soda Lake, CO
+39.61,-104.67|Aurora Reservoir, CO
+39.61,-104.68|Aurora Reservoir, CO
+39.54,-105.08|Chatfield Reservoir, CO
+39.55,-105.07|Chatfield Reservoir, CO
+39.55,-105.08|Chatfield Reservoir, CO
+39.54,-105.07|Chatfield Reservoir, CO
+39.54,-105.09|Chatfield Reservoir, CO
+39.53,-105.09|Chatfield Reservoir, CO
+39.23,-105.22|South Platte, CO
+39.23,-105.23|South Platte, CO
+40.01,-106.20|Williams Fork, CO
+40.01,-106.21|Williams Fork, CO
+39.62,-106.05|Lake Dillon, CO
+39.63,-106.05|Lake Dillon, CO
+39.64,-105.15|Lake McConaughy
+41.21,-101.77|Lake McConaughy
+24.05,-109.99|La Paz, Mexico
+24.09,-109.99|La Paz, Mexico
+24.08,-110.00|La Paz, Mexico
+24.09,-110.00|La Paz, Mexico
+24.08,-110|La Paz, Mexico
+24.09,-110|La Paz, Mexico
 26.44,-81.92|SW Florida Coast (Stuart/Jupiter)
 26.46,-81.97|SW Florida Coast (Stuart/Jupiter)
 26.43,-81.92|SW Florida Coast (Stuart/Jupiter)
@@ -149,7 +197,7 @@ jq -r '.[] |
   [((.start_latlng[0]*100|floor)/100), ((.start_latlng[1]*100|floor)/100), (.distance/1609.34)] | @tsv' "$RAW_FILE" |
 awk -F'\t' '
   NR==FNR {
-    # First file: mapping of coords to labels
+    # First file: mapping of coords to labels (use detailed mileage mappings)
     if ($0 == "") next;
     split($0, parts, "|");
     if (length(parts[1]) && length(parts[2])) {
@@ -166,4 +214,4 @@ awk -F'\t' '
   END {
     for (lbl in sum) printf "  %-30s %8.2f miles\n", lbl, sum[lbl];
   }
-' <(printf "%s\n" "$LOCATION_NAMES") - | sort
+' <(printf "%s\n" "$MILEAGE_LOCATION_NAMES") - | sort
