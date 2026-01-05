@@ -42,8 +42,10 @@ echo ""
 echo "Analyzing water-sport activities..."
 echo ""
 
-# Analyze the fetched data
-"$SCRIPT_DIR/analyze_water_sports.sh" "$OUTPUT_DIR"
+# Analyze the fetched data and save to both console and file
+"$SCRIPT_DIR/analyze_water_sports.sh" "$OUTPUT_DIR" | tee "$OUTPUT_DIR/water_sports_analysis.txt"
 
 echo ""
 echo "Done! Data saved in $OUTPUT_DIR/"
+echo "  - Raw data: $OUTPUT_DIR/raw_activities.json"
+echo "  - Analysis: $OUTPUT_DIR/water_sports_analysis.txt"

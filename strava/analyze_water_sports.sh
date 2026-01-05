@@ -131,6 +131,13 @@ echo "Water Sports Activities by Location (2025)"
 echo "=========================================="
 echo ""
 
+# Calculate total miles
+TOTAL_MILES=$(jq '[.[] | select((.sport_type|ascii_downcase) | test("kitesurf|windsurf|swim|sail")) | .distance/1609.34] | add' "$RAW_FILE")
+TOTAL_MILES=$(printf "%.2f" "$TOTAL_MILES")
+
+echo "Total Water Sports Mileage: $TOTAL_MILES miles"
+echo ""
+
 # Extract and group by location
 jq -r '.[] | 
   select((.sport_type|ascii_downcase) | test("kitesurf|windsurf|swim|sail")) | 
