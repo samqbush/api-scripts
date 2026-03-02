@@ -93,7 +93,7 @@ refresh_access_token() {
         fi
 
         echo "Refresh succeeded; token expires at ${EXPIRES_HUMAN}."
-        echo "(Update your .env with the new access and refresh tokens if you want them persisted.)"
+        echo "(Update your ../.strava file with the new access and refresh tokens if you want them persisted.)"
         REFRESHED=true
         return 0
     else

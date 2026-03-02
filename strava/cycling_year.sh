@@ -26,6 +26,12 @@ if [[ -z "$1" ]]; then
 fi
 
 YEAR="$1"
+
+if ! [[ "$YEAR" =~ ^[0-9]{4}$ ]]; then
+    echo "Error: YEAR must be a 4-digit number (e.g., 2024)." >&2
+    exit 1
+fi
+
 AFTER_DATE="${YEAR}-01-01"
 BEFORE_DATE="$((YEAR + 1))-01-01"
 OUTPUT_DIR="strava_cycling_${YEAR}_report"

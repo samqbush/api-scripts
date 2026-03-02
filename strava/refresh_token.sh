@@ -35,6 +35,14 @@ if [[ -f "$(dirname "$0")/../.strava" ]]; then
   set +a
 fi
 
+# Check for required tools
+for tool in curl jq date; do
+    if ! command -v "$tool" &> /dev/null; then
+        echo "Error: Required tool '$tool' is not installed" >&2
+        exit 1
+    fi
+done
+
 show_help() {
   sed -n '/^# Script:/,/^################################################################################$/p' "$0" | sed 's/^# //; s/^#//'
 }

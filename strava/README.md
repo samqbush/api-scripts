@@ -1,13 +1,13 @@
-# Strava Water Sports Activity Tracker
+# Strava Activity Tracker (Water Sports & Cycling)
 
-A collection of Bash scripts to fetch, analyze, and visualize water-sport activities from Strava, with location-based grouping and mileage tracking.
+A collection of Bash scripts to fetch, analyze, and visualize water-sport and cycling activities from Strava, with location-based grouping and mileage tracking.
 
 ## Overview
 
 These scripts allow you to:
 - Fetch Strava activities for any date range
 - Automatically refresh expired access tokens
-- Analyze water-sport activities (Kitesurf, Windsurf, Sail, Swim) by location
+- Analyze water-sport activities (Kitesurf, Windsurf, Sail, Swim) and cycling by location
 - View yearly summaries with human-readable location names
 - Track mileage by location with detailed breakdowns
 
@@ -28,20 +28,17 @@ These scripts allow you to:
 
 ### 2. Create Secret Configuration File
 
-Copy the example and create your secrets file:
+Create a `.strava` file in the repository root with your credentials:
 
 ```bash
 cd /path/to/api-scripts
-cp .env.example .strava
-```
-
-Edit `.strava` and add your credentials:
-
-```bash
+cat > .strava <<'EOF'
 STRAVA_CLIENT_ID=193221
 STRAVA_CLIENT_SECRET=your_client_secret_here
 STRAVA_ACCESS_TOKEN=your_access_token_here
 STRAVA_REFRESH_TOKEN=your_refresh_token_here
+EOF
+chmod 600 .strava
 ```
 
 **Important:** The `.strava` file is gitignored and should never be committed.
@@ -75,6 +72,15 @@ Fetch and analyze all water-sport activities for a given year:
 ```bash
 ./strava/water_sports_year.sh 2024
 ./strava/water_sports_year.sh 2025
+```
+
+### Quick Start: Yearly Cycling Summary
+
+Fetch and analyze all cycling/mountain biking activities for a given year:
+
+```bash
+./strava/cycling_year.sh 2024
+./strava/cycling_year.sh 2025
 ```
 
 **Output:**
@@ -211,8 +217,8 @@ strava_YEAR_report/
 ## Example Output
 
 ```
-Water Sports Activities by Location (2025)
-==========================================
+Water Sports Activities by Location
+===================================
 
 Soda Lake, CO
 ─────────────
@@ -291,12 +297,15 @@ Mileage by Location
 ```
 strava/
 ├── README.md                      # This file
-├── water_sports_year.sh           # Main entry point (year-based analysis)
+├── water_sports_year.sh           # Main entry point (water sports year analysis)
+├── cycling_year.sh                # Main entry point (cycling year analysis)
 ├── get_activities.sh              # Fetch activities from Strava API
-├── analyze_water_sports.sh        # Analyze and group by location
+├── analyze_water_sports.sh        # Analyze water sports and group by location
+├── analyze_cycling.sh             # Analyze cycling and group by location
 ├── get_token.sh                   # Exchange auth code for tokens
 ├── refresh_token.sh               # Manually refresh access token
-└── list_water_sport_locations.sh  # Helper to find unmapped coordinates
+├── list_water_sport_locations.sh  # Helper to find unmapped water sport coordinates
+└── list_cycling_locations.sh      # Helper to find unmapped cycling coordinates
 ```
 
 ## License

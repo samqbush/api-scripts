@@ -26,6 +26,15 @@ if [[ -z "$1" ]]; then
 fi
 
 YEAR="$1"
+
+# Validate that YEAR is a 4-digit number before using it in arithmetic
+if ! [[ "$YEAR" =~ ^[0-9]{4}$ ]]; then
+    echo "Error: YEAR must be a 4-digit number (e.g., 2024)."
+    echo "Usage: $0 <year>"
+    echo "Example: $0 2024"
+    exit 1
+fi
+
 AFTER_DATE="${YEAR}-01-01"
 BEFORE_DATE="$((YEAR + 1))-01-01"
 OUTPUT_DIR="strava_${YEAR}_report"

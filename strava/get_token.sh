@@ -128,11 +128,15 @@ if [[ "$WRITE_ENV" == "true" ]]; then
   if [[ -f "$ENV_PATH" ]]; then
     cp "$ENV_PATH" "${ENV_PATH}.bak"
   fi
+  OLD_UMASK=$(umask)
+  umask 077
   cat > "$ENV_PATH" <<EOF
 STRAVA_CLIENT_ID=${CLIENT_ID}
 STRAVA_CLIENT_SECRET=${CLIENT_SECRET}
 STRAVA_ACCESS_TOKEN=${ACCESS_TOKEN}
 STRAVA_REFRESH_TOKEN=${REFRESH_TOKEN}
 EOF
+  umask "$OLD_UMASK"
+  chmod 600 "$ENV_PATH" 2>/dev/null || true
   echo "Saved tokens to ${ENV_PATH} (backup at ${ENV_PATH}.bak if it existed)."
 fi

@@ -88,7 +88,7 @@ MILEAGE_LOCATION_NAMES="
 # Helper function to look up location label
 get_location_label() {
     local key="$1"
-    local label=$(echo "$LOCATION_NAMES" | grep "^${key}|" | cut -d'|' -f2)
+    local label=$(echo "$LOCATION_NAMES" | grep -F "${key}|" | cut -d'|' -f2)
     if [[ -z "$label" ]]; then
         echo "Unknown ($key)"
     else
@@ -114,15 +114,15 @@ get_keyword_label() {
   echo ""
 }
 
-echo "Mountain Biking Activities by Location (2025)"
-echo "=============================================="
+echo "Mountain Biking Activities by Location"
+echo "======================================"
 echo ""
 
 # Calculate total mileage and elevation
-TOTAL_MILES=$(jq '[.[] | select((.sport_type|ascii_downcase) | test("mountainbikeride|ride")) | .distance/1609.34] | add' "$RAW_FILE")
+TOTAL_MILES=$(jq '[.[] | select((.sport_type|ascii_downcase) | test("mountainbikeride|ride")) | .distance/1609.34] | add // 0' "$RAW_FILE")
 TOTAL_MILES=$(printf "%.2f" "$TOTAL_MILES")
 
-TOTAL_ELEVATION=$(jq '[.[] | select((.sport_type|ascii_downcase) | test("mountainbikeride|ride")) | .total_elevation_gain] | add' "$RAW_FILE")
+TOTAL_ELEVATION=$(jq '[.[] | select((.sport_type|ascii_downcase) | test("mountainbikeride|ride")) | .total_elevation_gain] | add // 0' "$RAW_FILE")
 TOTAL_ELEVATION=$(printf "%.0f" "$TOTAL_ELEVATION")
 
 echo "Total Cycling Mileage: $TOTAL_MILES miles"
@@ -136,7 +136,7 @@ jq -r '.[] |
   @tsv' "$RAW_FILE" | \
 while IFS=$'\t' read -r sport name date coords miles elevation; do
     if [[ -n "$coords" ]]; then
-        # Round coords to 2 decimals for grouping
+        # Round coords to 3 decimals for grouping
         lat=$(echo "$coords" | cut -d',' -f1)
         lon=$(echo "$coords" | cut -d',' -f2)
         rounded_lat=$(printf "%.3f" "$lat")

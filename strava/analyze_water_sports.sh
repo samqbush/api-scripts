@@ -28,7 +28,7 @@ if [[ ! -f "$RAW_FILE" ]]; then
     exit 1
 fi
 
-# Location name mappings as a colon-delimited list (lat,lon|label)
+# Location name mappings as a newline-delimited list of lat,lon|label records
 LOCATION_NAMES="
 39.65,-105.17|Soda Lake, CO
 39.64,-105.17|Soda Lake, CO
@@ -119,7 +119,7 @@ MILEAGE_LOCATION_NAMES="
 # Helper function to look up location label
 get_location_label() {
     local key="$1"
-    local label=$(echo "$LOCATION_NAMES" | grep "^${key}|" | cut -d'|' -f2)
+    local label=$(echo "$LOCATION_NAMES" | grep -F "${key}|" | cut -d'|' -f2)
     if [[ -z "$label" ]]; then
         echo "Unknown ($key)"
     else
@@ -127,12 +127,12 @@ get_location_label() {
     fi
 }
 
-echo "Water Sports Activities by Location (2025)"
-echo "=========================================="
+echo "Water Sports Activities by Location"
+echo "==================================="
 echo ""
 
 # Calculate total miles
-TOTAL_MILES=$(jq '[.[] | select((.sport_type|ascii_downcase) | test("kitesurf|windsurf|swim|sail")) | .distance/1609.34] | add' "$RAW_FILE")
+TOTAL_MILES=$(jq '[.[] | select((.sport_type|ascii_downcase) | test("kitesurf|windsurf|swim|sail")) | .distance/1609.34] | add // 0' "$RAW_FILE")
 TOTAL_MILES=$(printf "%.2f" "$TOTAL_MILES")
 
 echo "Total Water Sports Mileage: $TOTAL_MILES miles"
@@ -201,7 +201,7 @@ echo "==================="
 jq -r '.[] | 
   select((.sport_type|ascii_downcase) | test("kitesurf|windsurf|swim|sail")) | 
   select((.start_latlng//[])|length==2) |
-  [((.start_latlng[0]*100|floor)/100), ((.start_latlng[1]*100|floor)/100), (.distance/1609.34)] | @tsv' "$RAW_FILE" |
+  [(.start_latlng[0] | tostring | split(".") | .[0] + "." + (.[1][:2] // "00")), (.start_latlng[1] | tostring | split(".") | .[0] + "." + (.[1][:2] // "00")), (.distance/1609.34)] | @tsv' "$RAW_FILE" |
 awk -F'\t' '
   NR==FNR {
     # First file: mapping of coords to labels (use detailed mileage mappings)
