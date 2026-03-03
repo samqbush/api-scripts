@@ -3,3 +3,7 @@
 .vscode/
 /copilot_analysis*
 /user_management/compare_users_*
+.strava
+.strava.local
+.strava.*
+strava_*_report/
