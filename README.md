@@ -86,6 +86,19 @@ All scripts were generated with the assistance of GitHub Copilot.
 
 ### Bash Scripts (Recommended)
 - [`get_commits.sh`](./repo_data/get_commits.sh) - Gathers commit counts for repositories across an organization over the last 3 months
+- [`get_loc_stats.sh`](./repo_data/get_loc_stats.sh) - **Lines of Code Stats** - Collects lines added/deleted per contributor across an entire organization or enterprise using batched GraphQL queries. Scales to thousands of repos without exhausting API rate limits. Supports GitHub CLI and GitHub App authentication.
+   ```bash
+   # Single org, CLI auth
+   ./repo_data/get_loc_stats.sh --org my-org --csv --json
+
+   # Enterprise-wide, GitHub App auth (higher rate limits)
+   ./repo_data/get_loc_stats.sh --enterprise my-ent --auth-mode app \
+     --app-id 12345 --app-key app.pem --installation-id 67890 \
+     --csv --json
+   ```
+   - **Auth modes:** GitHub CLI (`gh`, 5K req/hr) or GitHub App (JWT, 15K req/hr)
+   - **Output:** Per-contributor and per-org CSV/JSON with summary stats
+   - **Requirements:** jq, gh (CLI mode) or openssl + curl (App mode)
 - [`github_emu_report.sh`](./repo_data/github_emu_report.sh) - Generates EMU (Enterprise Managed User) reports
 
 ### Python Scripts (Data Processing)
