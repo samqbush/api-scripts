@@ -112,6 +112,24 @@ while [ $# -gt 0 ]; do
 done
 
 # --- Validation ---
+# Validate numeric parameters
+validate_positive_int() {
+  local name="$1" value="$2"
+  case "$value" in
+    ''|*[!0-9]*) error "$name must be a positive integer, got: '$value'"; exit 1 ;;
+  esac
+  if [ "$value" -le 0 ]; then
+    error "$name must be a positive integer, got: '$value'"
+    exit 1
+  fi
+}
+
+validate_positive_int "--days" "$DAYS"
+validate_positive_int "--batch-size" "$BATCH_SIZE"
+if [ "$MAX_REPOS" != "0" ]; then
+  validate_positive_int "--max-repos" "$MAX_REPOS"
+fi
+
 if [ -z "$ORG" ] && [ -z "$ENTERPRISE" ]; then
   error "Must specify --org or --enterprise"
   show_usage
@@ -170,12 +188,28 @@ mkdir -p "$OUT_DIR"
 TEMP_DIR=$(mktemp -d)
 trap 'rm -rf "$TEMP_DIR"' EXIT
 
+# OS-aware date helper (GNU vs BSD)
+get_past_date() {
+  local days="$1"
+  if date --version >/dev/null 2>&1; then
+    date -u -d "${days} days ago" +"%Y-%m-%dT%H:%M:%SZ"
+  else
+    date -u -v-"${days}d" +"%Y-%m-%dT%H:%M:%SZ"
+  fi
+}
+
+# OS-aware epoch conversion helper (GNU vs BSD)
+date_to_epoch() {
+  local datestr="$1"
+  if date --version >/dev/null 2>&1; then
+    date -d "$datestr" +%s 2>/dev/null || echo 0
+  else
+    date -jf "%Y-%m-%dT%H:%M:%SZ" "$datestr" +%s 2>/dev/null || echo 0
+  fi
+}
+
 # Calculate since date (ISO 8601)
-if date --version >/dev/null 2>&1; then
-  SINCE_DATE=$(date -u -d "$DAYS days ago" +"%Y-%m-%dT%H:%M:%SZ")
-else
-  SINCE_DATE=$(date -u -v-"${DAYS}d" +"%Y-%m-%dT%H:%M:%SZ")
-fi
+SINCE_DATE=$(get_past_date "$DAYS")
 
 log "Lookback period: $DAYS days (since $SINCE_DATE)"
 log "Output directory: $OUT_DIR"
@@ -256,7 +290,7 @@ graphql_query() {
   local query="$1"
 
   if [ "$AUTH_MODE" = "cli" ]; then
-    gh api graphql -f query="$query" 2>/dev/null
+    gh api graphql -f query="$query"
   else
     local payload
     payload=$(jq -n --arg q "$query" '{query: $q}')
@@ -280,11 +314,7 @@ check_rate_limit() {
     warn "Rate limit low: $remaining remaining. Resets at $reset_at"
     if [ -n "$reset_at" ]; then
       local reset_epoch
-      if date --version >/dev/null 2>&1; then
-        reset_epoch=$(date -d "$reset_at" +%s 2>/dev/null || echo 0)
-      else
-        reset_epoch=$(date -jf "%Y-%m-%dT%H:%M:%SZ" "$reset_at" +%s 2>/dev/null || echo 0)
-      fi
+      reset_epoch=$(date_to_epoch "$reset_at")
       local now_epoch
       now_epoch=$(date +%s)
       local wait_secs=$(( reset_epoch - now_epoch + 5 ))
@@ -376,9 +406,7 @@ build_commit_query() {
   local fragments=""
   local idx=0
   for repo in "${repos[@]}"; do
-    # Sanitize repo name for GraphQL alias (replace non-alphanumeric with _)
-    local alias
-    alias=$(echo "repo_${idx}" | tr '-' '_')
+    local alias="repo_${idx}"
     fragments="${fragments}
     ${alias}: repository(owner: \"$org\", name: \"$repo\") {
       name
@@ -392,6 +420,8 @@ build_commit_query() {
                 deletions
                 author {
                   user { login }
+                  name
+                  email
                 }
               }
               pageInfo { hasNextPage endCursor }
@@ -416,7 +446,7 @@ fetch_remaining_commits() {
   local has_next=true
   while [ "$has_next" = "true" ]; do
     local query
-    query="{ repository(owner: \"$org\", name: \"$repo\") { defaultBranchRef { target { ... on Commit { history(since: \"$SINCE_DATE\", first: 100, after: \"$cursor\") { nodes { additions deletions author { user { login } } } pageInfo { hasNextPage endCursor } } } } } } rateLimit { remaining resetAt } }"
+    query="{ repository(owner: \"$org\", name: \"$repo\") { defaultBranchRef { target { ... on Commit { history(since: \"$SINCE_DATE\", first: 100, after: \"$cursor\") { nodes { additions deletions author { user { login } name email } } pageInfo { hasNextPage endCursor } } } } } } rateLimit { remaining resetAt } }"
 
     local response
     response=$(graphql_query "$query")
@@ -460,9 +490,7 @@ process_repo_batch() {
   local idx=0
   for repo in "${repos[@]}"; do
     local alias
-    alias="repo_${idx}"
-    # Fix alias for jq (replace - with _)
-    alias=$(echo "$alias" | tr '-' '_')
+    local alias="repo_${idx}"
 
     local repo_data
     repo_data=$(echo "$response" | jq -c ".data.${alias}" 2>/dev/null)
@@ -480,7 +508,7 @@ process_repo_batch() {
 
     # Extract commits from first page
     echo "$repo_data" | jq -c --arg org "$org" --arg repo "$repo_name" \
-      '.defaultBranchRef.target.history.nodes[]? | {org: $org, repo: $repo, additions: .additions, deletions: .deletions, author: (.author.user.login // "unknown")}' \
+      '.defaultBranchRef.target.history.nodes[]? | {org: $org, repo: $repo, additions: (.additions // 0), deletions: (.deletions // 0), author: (.author.user.login // .author.name // .author.email // "unknown")}' \
       >> "$raw_file" 2>/dev/null
 
     # Check if pagination needed
@@ -498,7 +526,7 @@ process_repo_batch() {
       # Convert raw commit nodes to our standard format
       if [ -f "$page_file" ]; then
         jq -c --arg org "$org" --arg repo "$repo_name" \
-          '{org: $org, repo: $repo, additions: .additions, deletions: .deletions, author: (.author.user.login // "unknown")}' \
+          '{org: $org, repo: $repo, additions: (.additions // 0), deletions: (.deletions // 0), author: (.author.user.login // .author.name // .author.email // "unknown")}' \
           "$page_file" >> "$raw_file" 2>/dev/null
       fi
     fi
