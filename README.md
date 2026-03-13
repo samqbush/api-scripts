@@ -11,6 +11,26 @@ All scripts were generated with the assistance of GitHub Copilot.
 ## 📊 [Copilot Analytics](./copilot/)
 
 ### Bash Scripts (Recommended)
+- [`copilot_usage_dashboard.sh`](./copilot/copilot_usage_dashboard.sh) - **Usage Metrics Dashboard** — Fetches Copilot usage metrics from the REST API and displays a terminal dashboard with adoption, code-generation, pull-request, and CLI statistics. Supports enterprise and organization scopes with optional user-level detail.
+   ```bash
+   # Enterprise 28-day dashboard
+   ./copilot/copilot_usage_dashboard.sh --enterprise your-enterprise
+
+   # Organization single-day report with CSV export
+   ./copilot/copilot_usage_dashboard.sh --org your-org --day 2025-07-01 --csv
+
+   # Enterprise report with user-level detail, all export formats
+   ./copilot/copilot_usage_dashboard.sh --enterprise your-ent --users --csv --json --markdown
+
+   # Test mode with sample data (no authentication required)
+   ./copilot/copilot_usage_dashboard.sh --enterprise demo --test-mode
+   ```
+   - **API Reference:** [Copilot Usage Metrics REST API](https://docs.github.com/en/enterprise-cloud@latest/rest/copilot/copilot-usage-metrics)
+   - **Required Permissions:** `manage_billing:copilot` or `read:enterprise` (enterprise); `read:org` (organization)
+   - **Dashboard Sections:** Adoption & Active Users, Code Generation & Acceptance, Lines of Code, Pull Requests, CLI Usage, IDE/Feature/Language Breakdowns
+   - **Exports:** CSV, JSON, Markdown report
+   - **Features:** Test mode, user-level metrics (`--users`), single-day (`--day`) or 28-day reports
+
 - [`inactive_copilot.sh`](./copilot/inactive_copilot.sh) - Identifies Copilot users active and inactive within 90 days
 - [`compare_ghe_copilot_licenses.sh`](./compare_ghe_copilot_licenses.sh) - **License Gap Analysis** - Compares GitHub Enterprise Managed Users with Copilot licenses to identify users who have enterprise licenses but no Copilot license. Perfect for license optimization and provisioning planning.
    ```bash
