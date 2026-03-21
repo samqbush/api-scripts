@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "comment": "Only sessionEnd is needed — the audit upload script captures the full session (all turns, prompts, timestamps, checkpoints) from the local session store. Per-event logging (sessionStart, userPromptSubmitted) was removed as redundant.",
+  "hooks": {
+    "sessionEnd": [
+      {
+        "type": "command",
+        "bash": ".github/hooks/upload-session-audit.sh",
+        "comment": "Upload full session data to configured audit destination (set COPILOT_AUDIT_DEST env var)",
+        "cwd": ".",
+        "timeoutSec": 60
+      }
+    ]
+  }
+}
