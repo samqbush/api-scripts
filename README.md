@@ -10,6 +10,19 @@ All scripts were generated with the assistance of GitHub Copilot.
 
 ## 📊 [Copilot Analytics](./copilot/)
 
+### Session Audit Hooks
+- [`copilot/hooks/`](./copilot/hooks/) - **Copilot CLI Session Audit** - Automatically capture and upload Copilot CLI chat session data for auditing and compliance. Supports multiple destinations: local file, HTTP webhook, Datadog, Splunk, and AWS S3. **[Full Documentation →](./copilot/hooks/README.md)**
+   ```bash
+   # Copy hooks into your repo
+   cp copilot/hooks/hooks.json .github/hooks/
+   cp copilot/hooks/upload-session-audit.sh .github/hooks/
+   chmod +x .github/hooks/upload-session-audit.sh
+
+   # Set destination (file, http, datadog, splunk, s3)
+   export COPILOT_AUDIT_DEST="datadog"
+   export DD_API_KEY="your-key"
+   ```
+
 ### Bash Scripts (Recommended)
 - [`inactive_copilot.sh`](./copilot/inactive_copilot.sh) - Identifies Copilot users active and inactive within 90 days
 - [`compare_ghe_copilot_licenses.sh`](./compare_ghe_copilot_licenses.sh) - **License Gap Analysis** - Compares GitHub Enterprise Managed Users with Copilot licenses to identify users who have enterprise licenses but no Copilot license. Perfect for license optimization and provisioning planning.

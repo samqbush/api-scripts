@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "type": "command",
+        "bash": "echo \"[$(date)] Session started\" >> .agent.log",
+        "powershell": "Add-Content -Path .agent.log -Value \"[$(Get-Date)] Session started\"",
+        "cwd": ".",
+        "timeoutSec": 10
+      }
+    ],
+    "userPromptSubmitted": [
+      {
+        "type": "command",
+        "bash": "echo \"[$(date)] Prompt: $(cat | jq -r '.prompt')\" >> .agent.log",
+        "powershell": "$input | ConvertFrom-Json | ForEach-Object { Add-Content -Path .agent.log -Value \"[$(Get-Date)] Prompt: $($_.prompt)\" }",
+        "cwd": ".",
+        "timeoutSec": 30
+      }
+    ],
+    "sessionEnd": [
+      {
+        "type": "command",
+        "bash": "echo \"[$(date)] Session ended ($(cat | jq -r '.reason'))\" >> .agent.log",
+        "powershell": "$input | ConvertFrom-Json | ForEach-Object { Add-Content -Path .agent.log -Value \"[$(Get-Date)] Session ended ($($_.reason))\" }",
+        "cwd": ".",
+        "timeoutSec": 10
+      },
+      {
+        "type": "command",
+        "bash": ".github/hooks/upload-session-audit.sh",
+        "comment": "Upload full session data to configured audit destination (set COPILOT_AUDIT_DEST env var)",
+        "cwd": ".",
+        "timeoutSec": 60
+      }
+    ]
+  }
+}
