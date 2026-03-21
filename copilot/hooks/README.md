@@ -163,7 +163,7 @@ Every captured session produces this JSON structure:
 
 ## Available Hook Events
 
-The `hooks.json` in this example uses three events, but Copilot CLI supports six:
+The `hooks.json` in this example uses only `sessionEnd` (since the audit upload captures the full session retroactively), but Copilot CLI supports six hook events:
 
 | Event | When It Fires | Can Block? |
 |---|---|---|
