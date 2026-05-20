@@ -102,6 +102,24 @@ All scripts were generated with the assistance of GitHub Copilot.
 
 ## 👥 [Teams Management](./teams/)
 
+- [`list_org_teams.sh`](./teams/list_org_teams.sh) - **Enterprise Orgs & Teams Export** - Lists all organizations in a GitHub Enterprise and all teams within each org, including member counts. Supports both GitHub Enterprise Cloud and GHES (3.16+). Outputs CSV and JSON.
+   ```bash
+   # GitHub Enterprise Cloud
+   ./teams/list_org_teams.sh --enterprise my-enterprise
+
+   # GitHub Enterprise Server
+   ./teams/list_org_teams.sh --enterprise my-enterprise --hostname ghes.company.com
+
+   # Custom output directory
+   ./teams/list_org_teams.sh --enterprise my-enterprise --out team_audit
+
+   # Interactive (prompts for enterprise slug)
+   ./teams/list_org_teams.sh
+   ```
+   - **Required Permissions:** `read:org`, `read:enterprise`
+   - **Output:** CSV (`org,team,member_count`) and JSON array
+   - **GHES:** Requires version 3.16+ and `gh auth login --hostname <host>`
+
 - [`list_teams.sh`](./teams/list_teams.sh) - Lists teams in an organization with more than 5 members (useful for identifying teams eligible for Copilot team metrics)
 
 ## Prerequisites
