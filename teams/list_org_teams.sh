@@ -128,10 +128,19 @@ fetch_orgs() {
     }"
 
     local response
-    response=$(gh api graphql $GH_HOST_FLAG -f query="$query" 2>&1)
+    local gh_stderr
+    gh_stderr=$(mktemp)
+    response=$(gh api graphql $GH_HOST_FLAG -f query="$query" 2>"$gh_stderr") || {
+      echo "Error calling GitHub API: $(cat "$gh_stderr")" >&2
+      rm -f "$gh_stderr"
+      exit 1
+    }
+    rm -f "$gh_stderr"
 
-    if echo "$response" | jq -e '.errors' > /dev/null 2>&1; then
-      echo "Error fetching organizations: $(echo "$response" | jq -r '.errors[0].message')" >&2
+    local errmsg
+    errmsg=$(echo "$response" | jq -r '.errors[0].message // empty')
+    if [[ -n "$errmsg" ]]; then
+      echo "Error fetching organizations: $errmsg" >&2
       exit 1
     fi
 
@@ -151,25 +160,27 @@ fetch_orgs() {
   printf '%s\n' "${orgs[@]}"
 }
 
-# Fetch all teams for a given org with member counts
+# Fetch all teams for a given org with member counts (outputs NDJSON)
 fetch_teams() {
   local org="$1"
 
-  gh api "orgs/$org/teams" $GH_HOST_FLAG --paginate --jq '.[] | {slug: .slug, name: .name, members_count: .members_count // 0}' 2>/dev/null | \
+  gh api "orgs/$org/teams" $GH_HOST_FLAG --paginate --jq '.[] | {slug: .slug, name: .name, members_count: .members_count}' 2>/dev/null | jq -c '.' | \
     while IFS= read -r team_json; do
       local team_name
       local member_count
+      local slug
       team_name=$(echo "$team_json" | jq -r '.name')
-      member_count=$(echo "$team_json" | jq -r '.members_count')
+      member_count=$(echo "$team_json" | jq -r '.members_count // empty')
+      slug=$(echo "$team_json" | jq -r '.slug')
 
-      # If members_count is 0 or null, fetch actual count
-      if [[ "$member_count" == "0" || "$member_count" == "null" ]]; then
-        local slug
-        slug=$(echo "$team_json" | jq -r '.slug')
-        member_count=$(gh api "orgs/$org/teams/$slug/members" $GH_HOST_FLAG --paginate --jq 'length' 2>/dev/null | paste -sd+ - | bc 2>/dev/null || echo 0)
+      # If members_count is null/missing, fetch actual count
+      if [[ -z "$member_count" ]]; then
+        member_count=$(gh api "orgs/$org/teams/$slug/members" $GH_HOST_FLAG --paginate --jq 'length' 2>/dev/null | awk '{s+=$1} END {print s+0}')
       fi
 
-      echo "$org,$team_name,$member_count"
+      # Output as JSON object for safe downstream handling
+      jq -n --arg org "$org" --arg team "$team_name" --argjson count "${member_count:-0}" \
+        '{org: $org, team: $team, member_count: $count}'
     done
 }
 
@@ -184,10 +195,10 @@ fi
 # Initialize CSV with header
 csv_file="$OUT_DIR/enterprise_teams.csv"
 json_file="$OUT_DIR/enterprise_teams.json"
-echo "org,team,member_count" > "$csv_file"
+echo '"org","team","member_count"' > "$csv_file"
 
-# Collect all results
-all_results=()
+# Collect all results as NDJSON
+ndjson_file=$(mktemp)
 org_count=0
 team_total=0
 
@@ -198,8 +209,9 @@ while IFS= read -r org; do
 
   while IFS= read -r line; do
     if [[ -n "$line" ]]; then
-      all_results+=("$line")
-      echo "$line" >> "$csv_file"
+      echo "$line" >> "$ndjson_file"
+      # Append properly quoted CSV row
+      echo "$line" | jq -r '[.org, .team, (.member_count | tostring)] | @csv' >> "$csv_file"
       team_total=$((team_total + 1))
     fi
   done < <(fetch_teams "$org")
@@ -208,24 +220,9 @@ while IFS= read -r org; do
   sleep 0.5
 done <<< "$orgs"
 
-# Generate JSON output
-{
-  echo "["
-  local_first=true
-  for row in "${all_results[@]}"; do
-    IFS=',' read -r r_org r_team r_count <<< "$row"
-    if [[ "$local_first" == "true" ]]; then
-      local_first=false
-    else
-      echo ","
-    fi
-    # Escape any quotes in team names
-    r_team=$(echo "$r_team" | sed 's/"/\\"/g')
-    printf '  {"org": "%s", "team": "%s", "member_count": %s}' "$r_org" "$r_team" "${r_count:-0}"
-  done
-  echo ""
-  echo "]"
-} > "$json_file"
+# Generate JSON array from NDJSON
+jq -s '.' "$ndjson_file" > "$json_file"
+rm -f "$ndjson_file"
 
 echo ""
 echo "Done! Processed $org_count org(s), $team_total team(s) total."
