@@ -7,3 +7,4 @@
 .strava.local
 .strava.*
 strava_*_report/
+enterprise_teams_*/
